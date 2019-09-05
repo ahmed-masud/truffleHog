@@ -162,7 +162,14 @@ def print_results(printJson, issue):
     committer_email = issue['committerEmail']
 
     if printJson:
-        print(json.dumps(issue, sort_keys=True))
+        if not os.path.exists('issues'):
+            os.mkdir('issues')
+
+        if not os.path.exists('issues/{}.json'.format(commitHash)):
+            f = open('issues/{}.json'.format(commitHash), 'w')
+            f.write(json.dumps(issue, sort_keys=True))
+            f.write('\n\n')
+            f.close()
     else:
         print("~~~~~~~~~~~~~~~~~~~~~")
         reason = "{}Reason: {}{}".format(bcolors.OKGREEN, reason, bcolors.ENDC)
