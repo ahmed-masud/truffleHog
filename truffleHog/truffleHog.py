@@ -368,10 +368,6 @@ def find_strings(git_url, since_commit=None, max_depth=1000000, printJson=False,
     issuesStr = "{}{} issues found.{} JSON data saved to 'issues'".format(bcolors.FAIL, noOfIssues, bcolors.ENDC)
     print(issuesStr)
 
-    # print str() + ' issues found. JSON data saved to /issues'
-
-    # reason = "{}Reason: {}{}".format(bcolors.OKGREEN, reason, bcolors.ENDC)
-
     if not repo_path:
         shutil.rmtree(project_path, onerror=del_rw)
     return output
