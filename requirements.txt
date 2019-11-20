@@ -3,3 +3,5 @@ unittest2==1.1.0
 pytest-cov==2.5.1
 codecov==2.0.15
 truffleHogRegexes==0.0.7
+twine==1.13.0
+keyring==19.0.1

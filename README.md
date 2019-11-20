@@ -1,22 +1,23 @@
-# truffleHog
-[![Build Status](https://travis-ci.org/dxa4481/truffleHog.svg?branch=master)](https://travis-ci.org/dxa4481/truffleHog)
-[![codecov](https://codecov.io/gh/dxa4481/truffleHog/branch/master/graph/badge.svg)](https://codecov.io/gh/dxa4481/truffleHog)
-
-Searches through git repositories for secrets, digging deep into commit history and branches. This is effective at finding secrets accidentally committed.
-
-## NEW
-truffleHog previously functioned by running entropy checks on git diffs. This functionality still exists, but high signal regex checks have been added, and the ability to surpress entropy checking has also been added.
+[![Package Version](https://img.shields.io/pypi/v/truffleHog3.svg)](https://pypi.org/project/truffleHog3)
+![Python Version](https://img.shields.io/badge/python-3.6%2B-informational.svg)
+[![Build Status](https://travis-ci.com/feeltheajf/truffleHog3.svg?branch=master)](https://travis-ci.com/feeltheajf/truffleHog3)
+[![Code Coverage](https://codecov.io/gh/feeltheajf/truffleHog3/branch/master/graph/badge.svg)](https://codecov.io/gh/feeltheajf/truffleHog3)
+[![Downloads](https://pepy.tech/badge/trufflehog3)](https://pepy.tech/project/trufflehog3)
 
 
-```
-truffleHog --regex --entropy=False https://github.com/dxa4481/truffleHog.git
-```
+# truffleHog3
+This is an enhanced version of [truffleHog](https://github.com/dxa4481/truffleHog) scanner
 
-or
 
-```
-truffleHog file:///user/dxa4481/codeprojects/truffleHog/
-```
+## New
+
+- Python 3.6
+- flake8 compliant code
+- output to file option
+- option to disable Git history checks - scan simple files/folders
+- option to exclude files/directories
+- config file support with automatic detection of [trufflehog.json](https://github.com/feeltheajf/truffleHog3/blob/master/trufflehog.json.example) config in source code directory
+
 
 With the `--include_paths` and `--exclude_paths` options, it is also possible to limit scanning to a subset of objects in the Git history by defining regular expressions (one per line) in a file to match the targeted object paths. To illustrate, see the example include and exclude files below:
 
@@ -47,72 +48,47 @@ With these filters, issues found in files in the root-level `src` directory woul
 These features help cut down on noise, and makes the tool easier to shove into a devops pipeline.
 
 ![Example](https://i.imgur.com/YAXndLD.png)
+## Installation
 
-## Install
+Package is available on [PyPI](https://pypi.org/project/truffleHog3)
+
 ```
-pip install truffleHog
+pip install truffleHog3
 ```
+
 
 ## Customizing
 
-Custom regexes can be added with the following flag `--rules /path/to/rules`. This should be a json file of the following format:
-```
-{
-    "RSA private key": "-----BEGIN EC PRIVATE KEY-----"
-}
-```
-Things like subdomain enumeration, s3 bucket detection, and other useful regexes highly custom to the situation can be added.
+List of regexes was moved into repository, see [regexes.json](https://github.com/feeltheajf/truffleHog3/blob/master/truffleHog3/regexes.json)
 
-Feel free to also contribute high signal regexes upstream that you think will benefit the community. Things like Azure keys, Twilio keys, Google Compute keys, are welcome, provided a high signal regex can be constructed.
-
-trufflehog's base rule set sources from https://github.com/dxa4481/truffleHogRegexes/blob/master/truffleHogRegexes/regexes.json
-
-## How it works
-This module will go through the entire commit history of each branch, and check each diff from each commit, and check for secrets. This is both by regex and by entropy. For entropy checks, truffleHog will evaluate the shannon entropy for both the base64 char set and hexidecimal char set for every blob of text greater than 20 characters comprised of those character sets in each diff. If at any point a high entropy string >20 characters is detected, it will print to the screen.
 
 ## Help
 
 ```
-usage: trufflehog [-h] [--json] [--regex] [--rules RULES]
-                  [--entropy DO_ENTROPY] [--since_commit SINCE_COMMIT]
-                  [--max_depth MAX_DEPTH]
-                  git_url
+usage: trufflehog3 [options] source
 
-Find secrets hidden in the depths of git.
+Find secrets in your codebase.
 
 positional arguments:
-  git_url               URL for secret searching
+  source              URL or local path for secret searching
 
 optional arguments:
-  -h, --help            show this help message and exit
-  --json                Output in JSON
-  --regex               Enable high signal regex checks
-  --rules RULES         Ignore default regexes and source from json list file
-  --entropy DO_ENTROPY  Enable entropy checks
-  --since_commit SINCE_COMMIT
-                        Only scan from a given commit hash
-  --max_depth MAX_DEPTH
-                        The max commit depth to go back when searching for
-                        secrets
-  -i INCLUDE_PATHS_FILE, --include_paths INCLUDE_PATHS_FILE
-                        File with regular expressions (one per line), at least
-                        one of which must match a Git object path in order for
-                        it to be scanned; lines starting with "#" are treated
-                        as comments and are ignored. If empty or not provided
-                        (default), all Git object paths are included unless
-                        otherwise excluded via the --exclude_paths option.
-  -x EXCLUDE_PATHS_FILE, --exclude_paths EXCLUDE_PATHS_FILE
-                        File with regular expressions (one per line), none of
-                        which may match a Git object path in order for it to
-                        be scanned; lines starting with "#" are treated as
-                        comments and are ignored. If empty or not provided
-                        (default), no Git object paths are excluded unless
-                        effectively excluded via the --include_paths option.
+  -h, --help          show this help message and exit
+  -c, --config        path to config file
+  -r, --rules         ignore default regexes and source from json
+  -o, --output        write report to file
+  -b, --branch        name of the branch to be scanned
+  -m, --max-depth     max commit depth for searching
+  -s, --since-commit  scan starting from a given commit hash
+  --json              output in JSON
+  --exclude           exclude paths from scan
+  --whitelist         skip matching strings
+  --no-regex          disable high signal regex checks
+  --no-entropy        disable entropy checks
+  --no-history        disable commit history check
 ```
 
-## Wishlist
 
-- ~~A way to detect and not scan binary diffs~~
-- ~~Don't rescan diffs if already looked at in another branch~~
-- ~~A since commit X feature~~
-- ~~Print the file affected~~
+## Thanks
+
+Special thanks to Dylan Ayrey ([@dxa4481](https://github.com/dxa4481)), developer of the original [truffleHog](https://github.com/dxa4481/truffleHog) scanner

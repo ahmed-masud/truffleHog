@@ -1,5 +1,12 @@
 /build/
 /dist/
-/truffleHog.egg-info/
+/*.egg-info/
 **/__pycache__/
 **/*.pyc
+/dev.py
+*coverage*
+.*cache
+*.code-workspace
+.vscode/**
+issues/
+.python-version
