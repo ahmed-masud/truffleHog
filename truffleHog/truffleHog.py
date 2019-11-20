@@ -18,8 +18,6 @@ from git import Repo
 from git import NULL_TREE
 from truffleHogRegexes.regexChecks import regexes
 
-
-
 def main():
     parser = argparse.ArgumentParser(description='Find secrets hidden in the depths of git.')
     parser.add_argument('--json', dest="output_json", action="store_true", help="Output in JSON")
@@ -160,15 +158,25 @@ def print_results(printJson, issue):
     commitHash = issue['commitHash']
     reason = issue['reason']
     path = issue['path']
+    committer = issue['committer']
+    committer_email = issue['committerEmail']
 
     if printJson:
-        print(json.dumps(issue, sort_keys=True))
+        if not os.path.exists('issues'):
+            os.mkdir('issues')
+
+        if not os.path.exists('issues/{}.json'.format(commitHash)):
+            f = open('issues/{}.json'.format(commitHash), 'w')
+            f.write(json.dumps(issue, sort_keys=True))
+            f.close()
     else:
         print("~~~~~~~~~~~~~~~~~~~~~")
         reason = "{}Reason: {}{}".format(bcolors.OKGREEN, reason, bcolors.ENDC)
         print(reason)
         dateStr = "{}Date: {}{}".format(bcolors.OKGREEN, commit_time, bcolors.ENDC)
         print(dateStr)
+        committerStr = "{}Committer: {} ({}){}".format(bcolors.OKGREEN, committer, committer_email, bcolors.ENDC)
+        print(committerStr)
         hashStr = "{}Hash: {}{}".format(bcolors.OKGREEN, commitHash, bcolors.ENDC)
         print(hashStr)
         filePath = "{}Filepath: {}{}".format(bcolors.OKGREEN, path, bcolors.ENDC)
@@ -216,6 +224,8 @@ def find_entropy(printableDiff, commit_time, branch_name, prev_commit, blob, com
         entropicDiff['stringsFound'] = stringsFound
         entropicDiff['printDiff'] = printableDiff
         entropicDiff['commitHash'] = prev_commit.hexsha
+        entropicDiff['committer'] = prev_commit.committer.name
+        entropicDiff['committerEmail'] = prev_commit.committer.email
         entropicDiff['reason'] = "High Entropy"
     return entropicDiff
 
@@ -240,6 +250,8 @@ def regex_check(printableDiff, commit_time, branch_name, prev_commit, blob, comm
             foundRegex['printDiff'] = found_diff
             foundRegex['reason'] = key
             foundRegex['commitHash'] = prev_commit.hexsha
+            foundRegex['committer'] = prev_commit.committer.name
+            foundRegex['committerEmail'] = prev_commit.committer.email
             regex_matches.append(foundRegex)
     return regex_matches
 
@@ -351,6 +363,12 @@ def find_strings(git_url, since_commit=None, max_depth=1000000, printJson=False,
     output["project_path"] = project_path
     output["clone_uri"] = git_url
     output["issues_path"] = output_dir
+
+    if printJson:
+        noOfIssues = len([name for name in os.listdir('./issues')])
+        issuesStr = "{}{} issues found.{} JSON data saved to 'issues'".format(bcolors.FAIL, noOfIssues, bcolors.ENDC)
+        print(issuesStr)
+
     if not repo_path:
         shutil.rmtree(project_path, onerror=del_rw)
     return output
